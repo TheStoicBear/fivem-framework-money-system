@@ -2,6 +2,7 @@
 
 let stuff = []
 let start = false
+let enableHud = true
 
 
 setTick(() => {
@@ -48,7 +49,7 @@ on('NAT2K15:BANKNOTIFY', (msg) => {
 
 
 function draw() {
-    if (stuff) {
+    if (stuff && enableHud) {
         SetTextFont(4)
         SetTextScale(0.44, 0.44)
         SetTextOutline()
@@ -74,4 +75,14 @@ exports('getclientaccount', (id) => {
     } else {
         return false
     }
+})
+
+
+RegisterCommand('mhud', function(source) {
+    if (enableHud) {
+        enableHud = false
+    } else {
+        enableHud = true
+    }
+    emit('chatMessage', `[^3SYSTEM^7] You have ${enableHud == true ? "Enabled" : "Disabled"} the money hud.`)
 })
