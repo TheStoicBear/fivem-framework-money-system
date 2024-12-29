@@ -1,7 +1,7 @@
 config = {}
 
 -- # this wil enable / deisable Debug printing for further testing. # --
-cohnfig.debug = true, -- Toggle debug prints
+cohnfig.debug = true -- Toggle debug prints
 
 -- # the amount the user will start with # --
 config.starting_money = 10000 -- starting money
