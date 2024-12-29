@@ -170,3 +170,113 @@ exports('updateaccount', function(id, data)
         debugPrint("Account not found for id: " .. id)
     end
 end)
+
+
+
+-- Hypto testing to order to view new exports and functinos. 
+-- Test commands for each function
+
+-- Test adding money
+RegisterCommand("testAddMoney", function(source, args)
+    local id = tonumber(args[1])
+    local amount = tonumber(args[2])
+    if id and amount then
+        addMoney(id, amount)
+        debugPrint("Test addMoney executed.")
+    else
+        debugPrint("Usage: /testAddMoney <id> <amount>")
+    end
+end, false)
+
+-- Test deducting money
+RegisterCommand("testDeductMoney", function(source, args)
+    local id = tonumber(args[1])
+    local amount = tonumber(args[2])
+    if id and amount then
+        local success = deductMoney(id, amount)
+        debugPrint("Test deductMoney executed. Success: " .. tostring(success))
+    else
+        debugPrint("Usage: /testDeductMoney <id> <amount>")
+    end
+end, false)
+
+-- Test depositing money
+RegisterCommand("testDepositMoney", function(source, args)
+    local id = tonumber(args[1])
+    local amount = tonumber(args[2])
+    if id and amount then
+        depositMoney(id, amount)
+        debugPrint("Test depositMoney executed.")
+    else
+        debugPrint("Usage: /testDepositMoney <id> <amount>")
+    end
+end, false)
+
+-- Test withdrawing money
+RegisterCommand("testWithdrawMoney", function(source, args)
+    local id = tonumber(args[1])
+    local amount = tonumber(args[2])
+    if id and amount then
+        withdrawMoney(id, amount)
+        debugPrint("Test withdrawMoney executed.")
+    else
+        debugPrint("Usage: /testWithdrawMoney <id> <amount>")
+    end
+end, false)
+
+-- Test fetching account data
+RegisterCommand("testGetAccount", function(source, args)
+    local id = tonumber(args[1])
+    if id then
+        local account = exports["money"]:getaccount(id)
+        if account then
+            debugPrint(("Account data for id %s: %s"):format(id, json.encode(account)))
+        else
+            debugPrint("No account found for id: " .. id)
+        end
+    else
+        debugPrint("Usage: /testGetAccount <id>")
+    end
+end, false)
+
+-- Test updating account data
+RegisterCommand("testUpdateAccount", function(source, args)
+    local id = tonumber(args[1])
+    local amount = tonumber(args[2])
+    local bank = tonumber(args[3])
+    if id and amount and bank then
+        exports["money"]:updateaccount(id, { amount = amount, bank = bank })
+        debugPrint("Test updateAccount executed.")
+    else
+        debugPrint("Usage: /testUpdateAccount <id> <amount> <bank>")
+    end
+end, false)
+
+-- Test salary payment simulation
+RegisterCommand("testPaySalary", function()
+    debugPrint("Test salary payment simulation started.")
+    for _, player in ipairs(GetPlayers()) do
+        local src = tonumber(player)
+        if accounts[src] and accounts[src].dept then
+            debugPrint(("Paying salary for id: %s, dept: %s"):format(src, accounts[src].dept))
+            accounts[src].bank = accounts[src].bank + config.deptPay[accounts[src].dept]
+            TriggerClientEvent('NAT2K15:UPDATEPAY', src, accounts[src])
+        end
+    end
+end, false)
+
+-- Test account creation and database interaction
+RegisterCommand("testCheckSQL", function(source, args)
+    local steam = args[1]
+    local discord = args[2]
+    local first_name = args[3]
+    local last_name = args[4]
+    local dept = args[5]
+    if steam and discord and first_name and last_name and dept then
+        TriggerEvent('NAT2K15:CHECKSQL', steam, discord, first_name, last_name, dept)
+        debugPrint("Test CHECKSQL executed.")
+    else
+        debugPrint("Usage: /testCheckSQL <steam> <discord> <first_name> <last_name> <dept>")
+    end
+end, false)
+
