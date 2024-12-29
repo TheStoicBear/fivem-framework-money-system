@@ -133,21 +133,7 @@ AddEventHandler('playerDropped', function()
     end
 end)
 
--- Pay salary periodically
-Citizen.CreateThread(function()
-    debugPrint("Starting salary payment thread.")
-    while true do
-        Citizen.Wait(config.cycle_length * 60 * 1000)
-        for _, player in ipairs(GetPlayers()) do
-            local src = tonumber(player)
-            if accounts[src] and accounts[src].dept then
-                debugPrint(("Paying salary for id: %s, dept: %s"):format(src, accounts[src].dept))
-                accounts[src].bank = accounts[src].bank + config.deptPay[accounts[src].dept]
-                TriggerClientEvent('NAT2K15:UPDATEPAY', src, accounts[src])
-            end
-        end
-    end
-end)
+
 
 -- Exports for external usage
 exports('addMoney', addMoney)
