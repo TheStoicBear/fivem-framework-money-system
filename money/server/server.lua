@@ -9,7 +9,6 @@ AddEventHandler('NAT2K15:CHECKSQL', function(steam, discord, first_name, last_na
     local src = source
     if(accounts[src]) then
         MySQL.Async.execute("UPDATE money SET bank = @bank, amount = @amount WHERE steam = @steam AND first = @first AND last = @last AND dept = @dept", {["@bank"] = accounts[src].bank, ["@amount"] = accounts[src].amount, ["@steam"] = steam, ["@first"] = accounts[src].first, ["@last"] = accounts[src].last, ["@dept"] = accounts[src].dept})
-        
     end
     MySQL.Async.fetchAll("SELECT * FROM money WHERE steam = @steam AND first = @first AND last = @last AND dept = @dept", {["@steam"] = steam, ["@first"] = first_name, ["@last"] = last_name, ["@dept"] = dept}, function(data) 
         if(data[1] == nil) then
@@ -23,22 +22,6 @@ AddEventHandler('NAT2K15:CHECKSQL', function(steam, discord, first_name, last_na
     end)
 end)
 
--- if(config.enable_change_your_own_cycle) then
---     RegisterCommand('setsalary', function(source, args, message) 
---         local length = args[1];
---         if(length == nil) then return TriggerClientEvent('chatMessage', source, "[^3SYSTEM^0] Please ensure to have a valid amount.") end
---         length = tonumber(length)
---         if(length == nil) then return TriggerClientEvent('chatMessage', source, "[^3SYSTEM^0] Please ensure to have a valid amount.") end
---         if(length > 99999) then length = 99999 end
---         if(length < 0) then length = config.deptPay[accounts[source].dept] end
---         TriggerClientEvent('chatMessage', source, "[^3BANK^0] Your daily salary has been changed to ^2" .. length)
---         if(accounts[source]) then
---             accounts[source].cycle = length
---             TriggerClientEvent('NAT2K15:UPDATECLIENTMONEY', source, accounts[source])
---         end
---     end)
--- end
-
 AddEventHandler('playerDropped', function(reason) 
     local src = source
     if(accounts[src]) then 
@@ -51,21 +34,7 @@ AddEventHandler('playerDropped', function(reason)
     end
 end)
 
-Citizen.CreateThread(function() 
-    while true do
-        Citizen.Wait(config.cycle_length * 1000 * 60) -- config.cycle_length * 1000 * 60
-        for _, player in ipairs(GetPlayers()) do
-            player = tonumber(player)
-            local src = player
-            if(accounts[player]) then
-                if(accounts[player].dept) then
-                    accounts[player].bank =  config.deptPay[accounts[player].dept] + tonumber(accounts[player].bank)
-                    TriggerClientEvent('NAT2K15:UPDATEPAYCHECK', player, player, accounts[player])
-                end
-            end
-        end
-    end
-end)
+-- New exports for money-related functions
 
 exports('getaccount', function(id) 
     if(accounts[id]) then
@@ -75,14 +44,43 @@ exports('getaccount', function(id)
     end
 end)
 
-exports('updateaccount', function(id, array) 
-    if(accounts[id]) then
-        accounts[id].amount = array.cash
-        accounts[id].bank = array.bank
+exports('withdrawMoney', function(id, amount)
+    if(accounts[id] and accounts[id].amount >= amount) then
+        accounts[id].amount = accounts[id].amount - amount
         TriggerClientEvent('NAT2K15:UPDATEPAY', id, id, accounts[id])
         return true
-    else 
-        return nil
+    else
+        return false
+    end
+end)
+
+exports('depositMoney', function(id, amount)
+    if(accounts[id]) then
+        accounts[id].amount = accounts[id].amount + amount
+        TriggerClientEvent('NAT2K15:UPDATEPAY', id, id, accounts[id])
+        return true
+    else
+        return false
+    end
+end)
+
+exports('deductMoney', function(id, amount)
+    if(accounts[id] and accounts[id].amount >= amount) then
+        accounts[id].amount = accounts[id].amount - amount
+        TriggerClientEvent('NAT2K15:UPDATEPAY', id, id, accounts[id])
+        return true
+    else
+        return false
+    end
+end)
+
+exports('addMoney', function(id, amount)
+    if(accounts[id]) then
+        accounts[id].amount = accounts[id].amount + amount
+        TriggerClientEvent('NAT2K15:UPDATEPAY', id, id, accounts[id])
+        return true
+    else
+        return false
     end
 end)
 
@@ -99,7 +97,6 @@ exports('sendmoney', function(id, sendid, idarray, sendidarray)
         TriggerClientEvent('NAT2K15:UPDATEPAY', sendid, id, accounts[sendid])
     end
 end)
-
 
 exports('bankNotify', function(id, message) 
     TriggerClientEvent('NAT2K15:BANKNOTIFY', id, message)
